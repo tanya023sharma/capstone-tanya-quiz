@@ -1,0 +1,9 @@
+@TanyaQuiz.Api_HostAddress = http://localhost:5163
+
+POST {{TanyaQuiz.Api_HostAddress}}/api/v1/quizzes
+Content-Type: application/json
+
+{
+  "difficulty": "easy",
+  "sourceText": "The water cycle moves water through evaporation, condensation, precipitation, and collection. Heat from the sun causes liquid water to evaporate into water vapor. As vapor cools, it condenses into clouds. Water returns to Earth as precipitation and collects in bodies of water."
+}
