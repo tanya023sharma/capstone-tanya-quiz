@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  padding: 0 1.2rem;
+}
+
+.top-rule {
+  background: var(--accent);
+  height: 0.35rem;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.app-frame {
+  margin: 0 auto;
+  max-width: 78rem;
+  padding: 2.3rem 0 2rem;
+}
+
+.brand-bar,
+.footer-note {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 0.72rem;
+  justify-content: space-between;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.brand-bar {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(3rem, 8vw, 7rem);
+  padding-bottom: 1rem;
+}
+
+.brand-mark {
+  align-items: center;
+  background: var(--accent);
+  color: #fffefb;
+  display: inline-flex;
+  font-family: var(--display-font);
+  font-size: 1.05rem;
+  height: 2.2rem;
+  justify-content: center;
+  letter-spacing: 0;
+  width: 2.2rem;
+}
+
+.brand-caption {
+  margin-left: auto;
+  margin-right: 1.2rem;
+}
+
+.session-label {
+  border-left: 1px solid var(--line);
+  padding-left: 1.2rem;
+}
+
+.footer-note {
+  border-top: 1px solid var(--line);
+  margin-top: clamp(3rem, 8vw, 7rem);
+  padding-top: 1rem;
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    padding: 0 0.8rem;
+  }
+
+  .brand-caption {
+    display: none;
+  }
+
+  .session-label {
+    margin-left: auto;
+  }
+
+  .footer-note {
+    align-items: start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+}

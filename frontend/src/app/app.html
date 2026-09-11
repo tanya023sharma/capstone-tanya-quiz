@@ -1,0 +1,25 @@
+<main class="app-shell">
+  <div class="top-rule" aria-hidden="true"></div>
+  <div class="app-frame">
+    <header class="brand-bar">
+      <span class="brand-mark">TQ</span>
+      <span class="brand-caption">A quieter way to study</span>
+      @if (session.quiz(); as currentQuiz) {
+        <span class="session-label">{{ currentQuiz.difficulty | titlecase }} session</span>
+      }
+    </header>
+
+    @if (session.results()) {
+      <app-quiz-results />
+    } @else if (session.quiz()) {
+      <app-quiz-run />
+    } @else {
+      <app-source-entry />
+    }
+
+    <footer class="footer-note">
+      <span>Source-grounded practice</span>
+      <span>10 questions / 3 ways to think</span>
+    </footer>
+  </div>
+</main>
