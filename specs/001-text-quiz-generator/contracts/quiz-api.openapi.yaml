@@ -1,0 +1,420 @@
+openapi: 3.1.0
+info:
+  title: Tanya Quiz API
+  version: 1.0.0
+  description: >-
+    API for creating source-grounded quizzes, submitting complete attempts, and
+    regenerating a quiz from the same source text and difficulty.
+servers:
+  - url: /api/v1
+security: []
+paths:
+  /quizzes:
+    post:
+      operationId: createQuiz
+      summary: Generate a 10-question quiz
+      description: >-
+        Creates a quiz from user-provided source text. The response excludes
+        correct answers and explanations until a complete attempt is submitted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateQuizRequest'
+      responses:
+        '201':
+          description: A generated quiz ready for answers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/InsufficientSource'
+        '502':
+          $ref: '#/components/responses/GenerationUnavailable'
+        '504':
+          $ref: '#/components/responses/GenerationTimedOut'
+  /quizzes/{quizId}/submissions:
+    post:
+      operationId: submitQuiz
+      summary: Submit answers and receive scored results
+      parameters:
+        - $ref: '#/components/parameters/QuizId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitQuizRequest'
+      responses:
+        '200':
+          description: Server-calculated results for all questions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizResults'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '410':
+          $ref: '#/components/responses/QuizExpired'
+  /quizzes/{quizId}/regenerations:
+    post:
+      operationId: regenerateQuiz
+      summary: Generate a fresh quiz from the same source and difficulty
+      parameters:
+        - $ref: '#/components/parameters/QuizId'
+      responses:
+        '201':
+          description: A new quiz with cleared answer state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+        '404':
+          $ref: '#/components/responses/QuizNotFound'
+        '410':
+          $ref: '#/components/responses/QuizExpired'
+        '422':
+          $ref: '#/components/responses/InsufficientSource'
+        '502':
+          $ref: '#/components/responses/GenerationUnavailable'
+        '504':
+          $ref: '#/components/responses/GenerationTimedOut'
+components:
+  parameters:
+    QuizId:
+      name: quizId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    ValidationError:
+      description: The request did not meet a validation rule.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            sourceTooShort:
+              value:
+                code: SOURCE_TEXT_TOO_SHORT
+                message: Provide at least 100 non-whitespace characters.
+                traceId: 7d828552-e01e-47d5-b5c9-c7a0e1c99e98
+                fieldErrors:
+                  - field: sourceText
+                    message: Provide at least 100 non-whitespace characters.
+    InsufficientSource:
+      description: The source cannot support a complete, grounded quiz.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            insufficientSource:
+              value:
+                code: INSUFFICIENT_SOURCE_MATERIAL
+                message: The supplied text does not contain enough information for 10 supported questions.
+                traceId: 7d828552-e01e-47d5-b5c9-c7a0e1c99e98
+    GenerationUnavailable:
+      description: The configured generation provider is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            providerUnavailable:
+              value:
+                code: QUIZ_GENERATION_UNAVAILABLE
+                message: Quiz generation is temporarily unavailable. Try again shortly.
+                traceId: 7d828552-e01e-47d5-b5c9-c7a0e1c99e98
+    GenerationTimedOut:
+      description: Generation did not complete within the allowed time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            providerTimedOut:
+              value:
+                code: QUIZ_GENERATION_TIMED_OUT
+                message: Quiz generation took too long. Try again with the same text.
+                traceId: 7d828552-e01e-47d5-b5c9-c7a0e1c99e98
+    QuizNotFound:
+      description: The quiz ID is unknown.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    QuizExpired:
+      description: The quiz session expired.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            quizExpired:
+              value:
+                code: QUIZ_EXPIRED
+                message: This quiz has expired. Generate a new quiz to continue.
+                traceId: 7d828552-e01e-47d5-b5c9-c7a0e1c99e98
+  schemas:
+    GenerateQuizRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - sourceText
+        - difficulty
+      properties:
+        topicContext:
+          type: string
+          maxLength: 160
+          description: Optional learner-provided topic label. It is not a source of facts.
+        sourceText:
+          type: string
+          minLength: 100
+          maxLength: 20000
+          description: Source material. The server also validates non-whitespace length.
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+    Difficulty:
+      type: string
+      enum:
+        - easy
+        - medium
+        - hard
+    OptionLabel:
+      type: string
+      enum:
+        - A
+        - B
+        - C
+        - D
+    Quiz:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - difficulty
+        - questions
+        - expiresAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        topicContext:
+          type: string
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        questions:
+          type: array
+          minItems: 10
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/PublicQuestion'
+        expiresAt:
+          type: string
+          format: date-time
+    PublicQuestion:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - number
+        - prompt
+        - options
+      properties:
+        id:
+          type: string
+          format: uuid
+        number:
+          type: integer
+          minimum: 1
+          maximum: 10
+        prompt:
+          type: string
+          minLength: 1
+        options:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            $ref: '#/components/schemas/PublicOption'
+    PublicOption:
+      type: object
+      additionalProperties: false
+      required:
+        - label
+        - text
+      properties:
+        label:
+          $ref: '#/components/schemas/OptionLabel'
+        text:
+          type: string
+          minLength: 1
+    SubmitQuizRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          minItems: 10
+          maxItems: 10
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/SubmittedAnswer'
+    SubmittedAnswer:
+      type: object
+      additionalProperties: false
+      required:
+        - questionId
+        - selectedOption
+      properties:
+        questionId:
+          type: string
+          format: uuid
+        selectedOption:
+          $ref: '#/components/schemas/OptionLabel'
+    QuizResults:
+      type: object
+      additionalProperties: false
+      required:
+        - quizId
+        - score
+        - totalQuestions
+        - results
+      properties:
+        quizId:
+          type: string
+          format: uuid
+        score:
+          type: integer
+          minimum: 0
+          maximum: 10
+        totalQuestions:
+          type: integer
+          const: 10
+        results:
+          type: array
+          minItems: 10
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/QuestionResult'
+    QuestionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - questionId
+        - number
+        - prompt
+        - selectedOption
+        - correctOption
+        - isCorrect
+        - options
+        - evidence
+      properties:
+        questionId:
+          type: string
+          format: uuid
+        number:
+          type: integer
+          minimum: 1
+          maximum: 10
+        prompt:
+          type: string
+          minLength: 1
+        selectedOption:
+          $ref: '#/components/schemas/OptionLabel'
+        correctOption:
+          $ref: '#/components/schemas/OptionLabel'
+        isCorrect:
+          type: boolean
+        options:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            $ref: '#/components/schemas/ResultOption'
+        evidence:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/EvidenceExcerpt'
+    ResultOption:
+      type: object
+      additionalProperties: false
+      required:
+        - label
+        - text
+        - isCorrect
+        - explanation
+      properties:
+        label:
+          $ref: '#/components/schemas/OptionLabel'
+        text:
+          type: string
+          minLength: 1
+        isCorrect:
+          type: boolean
+        explanation:
+          type: string
+          minLength: 1
+    EvidenceExcerpt:
+      type: object
+      additionalProperties: false
+      required:
+        - quote
+        - sourceStart
+        - sourceEnd
+      properties:
+        quote:
+          type: string
+          minLength: 1
+        sourceStart:
+          type: integer
+          minimum: 0
+        sourceEnd:
+          type: integer
+          minimum: 1
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - message
+        - traceId
+      properties:
+        code:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+        traceId:
+          type: string
+          format: uuid
+        fieldErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+    FieldError:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
