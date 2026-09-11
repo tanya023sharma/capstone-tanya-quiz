@@ -1,0 +1,57 @@
+@if (quiz(); as currentQuiz) {
+  <section class="quiz-panel" aria-labelledby="quiz-title">
+    <header class="quiz-header">
+      <div>
+        <p class="eyebrow">{{ currentQuiz.difficulty | titlecase }} PRACTICE</p>
+        <h1 id="quiz-title">Make the material yours.</h1>
+      </div>
+      <div class="progress-mark" aria-label="Quiz progress">
+        <strong>{{ answeredCount() }}</strong><span>/10 answered</span>
+      </div>
+    </header>
+
+    <div class="question-list">
+      @for (question of currentQuiz.questions; track question.id) {
+        <article class="question-card" [attr.aria-labelledby]="'question-' + question.number">
+          <div class="question-meta">
+            <span>Question {{ question.number | number: '2.0-0' }}</span>
+            @if (session.answers()[question.id]) {
+              <span class="answered-mark">Answered</span>
+            }
+          </div>
+          <h2 [id]="'question-' + question.number">{{ question.prompt }}</h2>
+          <div class="option-list">
+            @for (option of question.options; track option.label) {
+              <button
+                type="button"
+                class="option-button"
+                [class.selected]="session.answers()[question.id] === option.label"
+                [attr.aria-pressed]="session.answers()[question.id] === option.label"
+                (click)="selectAnswer(question.id, option.label)"
+              >
+                <span class="option-label">{{ option.label }}</span>
+                <span>{{ option.text }}</span>
+              </button>
+            }
+          </div>
+        </article>
+      }
+    </div>
+
+    @if (error(); as currentError) {
+      <p class="error-banner" role="alert">{{ currentError.message }}</p>
+    }
+
+    <footer class="submit-bar">
+      <span>{{ 10 - answeredCount() }} questions left</span>
+      <button type="button" class="primary-action" [disabled]="loading()" (click)="submit()">
+        @if (loading()) {
+          <span class="spinner" aria-hidden="true"></span>
+          Checking answers...
+        } @else {
+          Submit quiz <span aria-hidden="true">→</span>
+        }
+      </button>
+    </footer>
+  </section>
+}

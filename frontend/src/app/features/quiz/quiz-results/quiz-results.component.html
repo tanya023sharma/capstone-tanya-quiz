@@ -1,0 +1,63 @@
+@if (results(); as currentResults) {
+  <section class="results-panel" aria-labelledby="results-title">
+    <header class="results-hero">
+      <div>
+        <p class="eyebrow">YOUR REVIEW</p>
+        <h1 id="results-title">You made it stick.</h1>
+        <p class="results-copy">Review the reasoning behind every option, not just the answer you chose.</p>
+      </div>
+      <div class="score-stamp" [attr.aria-label]="currentResults.score + ' out of ' + currentResults.totalQuestions">
+        <strong>{{ currentResults.score }}</strong>
+        <span>/ {{ currentResults.totalQuestions }}</span>
+        <small>{{ percentage() }}% correct</small>
+      </div>
+    </header>
+
+    <div class="result-list">
+      @for (result of currentResults.results; track result.questionId) {
+        <article class="result-card" [class.missed]="!result.isCorrect">
+          <div class="result-meta">
+            <span>Question {{ result.number | number: '2.0-0' }}</span>
+            <span [class.success-text]="result.isCorrect" [class.missed-text]="!result.isCorrect">
+              {{ result.isCorrect ? 'Correct' : 'Review this one' }}
+            </span>
+          </div>
+          <h2>{{ result.prompt }}</h2>
+          <p class="answer-line">
+            You chose <strong>{{ result.selectedOption }}</strong>
+            <span aria-hidden="true">·</span>
+            Correct answer <strong>{{ result.correctOption }}</strong>
+          </p>
+
+          <div class="explanation-grid">
+            @for (option of result.options; track option.label) {
+              <div class="explanation" [class.correct-explanation]="option.isCorrect">
+                <div class="explanation-heading">
+                  <span class="option-label">{{ option.label }}</span>
+                  <span>{{ option.isCorrect ? 'Why it works' : 'Why it misses' }}</span>
+                </div>
+                <p class="option-text">{{ option.text }}</p>
+                <p>{{ option.explanation }}</p>
+              </div>
+            }
+          </div>
+
+          <div class="evidence">
+            <span class="evidence-label">SOURCE TRACE</span>
+            @for (excerpt of result.evidence; track excerpt.sourceStart) {
+              <blockquote>“{{ excerpt.quote }}”</blockquote>
+            }
+          </div>
+        </article>
+      }
+    </div>
+
+    @if (error(); as currentError) {
+      <p class="error-banner" role="alert">{{ currentError.message }}</p>
+    }
+
+    <button type="button" class="regenerate-action" [disabled]="loading()" (click)="regenerate()">
+      @if (loading()) { Generating a fresh set... } @else { Regenerate from the same source → }
+    </button>
+  </section>
+}

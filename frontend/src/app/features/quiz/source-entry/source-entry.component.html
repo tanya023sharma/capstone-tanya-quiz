@@ -1,0 +1,75 @@
+<section class="entry-panel" aria-labelledby="entry-title">
+  <div class="entry-intro">
+    <p class="eyebrow">TANYA QUIZ / STUDY DESK</p>
+    <h1 id="entry-title">Turn reading into recall.</h1>
+    <p class="intro-copy">
+      Paste a source, choose the kind of thinking you want to practice, and get
+      a focused set of questions with feedback you can trust.
+    </p>
+  </div>
+
+  <div class="entry-form">
+    <label class="field-label" for="topic">Topic context <span>optional</span></label>
+    <input
+      id="topic"
+      [ngModel]="topicContext()"
+      (ngModelChange)="topicContext.set($event)"
+      placeholder="e.g. The water cycle"
+      maxlength="160"
+    />
+
+    <div class="label-row">
+      <label class="field-label" for="source">Your source text</label>
+      <span class="counter" [class.counter-warning]="sourceLength < 100">
+        {{ sourceLength }} / 100 minimum
+      </span>
+    </div>
+    <textarea
+      id="source"
+      [ngModel]="sourceText()"
+      (ngModelChange)="sourceText.set($event)"
+      rows="11"
+      placeholder="Paste an article, notes, chapter, or any other text here..."
+    ></textarea>
+
+    <fieldset>
+      <legend class="field-label">Difficulty</legend>
+      <div class="difficulty-grid">
+        @for (level of [
+          { value: 'easy', title: 'Easy', detail: 'Recall & basics' },
+          { value: 'medium', title: 'Medium', detail: 'Apply & connect' },
+          { value: 'hard', title: 'Hard', detail: 'Infer & analyze' }
+        ]; track level.value) {
+          <button
+            type="button"
+            class="difficulty-card"
+            [class.selected]="difficulty() === level.value"
+            [attr.aria-pressed]="difficulty() === level.value"
+            (click)="setDifficulty($any(level.value))"
+          >
+            <span class="difficulty-title">{{ level.title }}</span>
+            <span class="difficulty-detail">{{ level.detail }}</span>
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    @if (error(); as currentError) {
+      <p class="error-banner" role="alert">{{ currentError.message }}</p>
+    }
+
+    <button
+      type="button"
+      class="primary-action"
+      [disabled]="loading() || sourceLength < 100"
+      (click)="generate()"
+    >
+      @if (loading()) {
+        <span class="spinner" aria-hidden="true"></span>
+        Building your quiz...
+      } @else {
+        Generate 10 questions <span aria-hidden="true">→</span>
+      }
+    </button>
+  </div>
+</section>

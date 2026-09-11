@@ -1,0 +1,243 @@
+:host {
+  display: block;
+}
+
+.results-panel {
+  margin: 0 auto;
+  max-width: 64rem;
+}
+
+.results-hero {
+  align-items: end;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  padding-bottom: 2rem;
+}
+
+.eyebrow,
+.evidence-label {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.9rem;
+}
+
+h1 {
+  color: var(--ink);
+  font-family: var(--display-font);
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  margin: 0;
+}
+
+.results-copy {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 1.2rem 0 0;
+  max-width: 32rem;
+}
+
+.score-stamp {
+  align-items: baseline;
+  background: var(--ink);
+  color: #fffefb;
+  display: grid;
+  grid-template-columns: auto auto;
+  padding: 1.3rem 1.5rem;
+  min-width: 9.5rem;
+}
+
+.score-stamp strong {
+  font-family: var(--display-font);
+  font-size: 4.2rem;
+  font-weight: 500;
+  line-height: 0.8;
+}
+
+.score-stamp span {
+  font-family: var(--display-font);
+  font-size: 1.7rem;
+}
+
+.score-stamp small {
+  color: #ffbc9e;
+  font-size: 0.72rem;
+  grid-column: 1 / -1;
+  margin-top: 0.8rem;
+}
+
+.result-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.result-card {
+  background: rgba(255, 253, 247, 0.86);
+  border: 1px solid var(--line);
+  padding: clamp(1.15rem, 3vw, 2rem);
+}
+
+.result-card.missed {
+  border-left: 4px solid var(--accent);
+}
+
+.result-meta,
+.answer-line {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 0.78rem;
+  gap: 0.55rem;
+}
+
+.result-meta {
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.success-text {
+  color: var(--teal);
+}
+
+.missed-text {
+  color: var(--accent);
+}
+
+h2 {
+  color: var(--ink);
+  font-size: clamp(1.1rem, 2vw, 1.45rem);
+  line-height: 1.35;
+  margin: 1rem 0 0.8rem;
+}
+
+.answer-line strong {
+  color: var(--ink);
+}
+
+.explanation-grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 1.2rem;
+}
+
+.explanation {
+  background: #f3eee3;
+  border: 1px solid transparent;
+  padding: 0.95rem;
+}
+
+.correct-explanation {
+  background: #e7f0e9;
+  border-color: #b8d2bf;
+}
+
+.explanation-heading {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 0.7rem;
+  font-weight: 800;
+  gap: 0.55rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.option-label {
+  align-items: center;
+  border: 1px solid currentColor;
+  display: inline-flex;
+  height: 1.45rem;
+  justify-content: center;
+  width: 1.45rem;
+}
+
+.explanation p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.7rem 0 0;
+}
+
+.explanation .option-text {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.evidence {
+  border-top: 1px solid var(--line);
+  margin-top: 1.3rem;
+  padding-top: 1rem;
+}
+
+.evidence-label {
+  display: block;
+  font-size: 0.64rem;
+  margin-bottom: 0.55rem;
+}
+
+blockquote {
+  border-left: 2px solid var(--teal);
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  margin: 0.35rem 0 0;
+  padding-left: 0.75rem;
+}
+
+.regenerate-action {
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  cursor: pointer;
+  display: block;
+  font: inherit;
+  font-weight: 800;
+  margin: 1.5rem auto 0;
+  padding: 0.9rem 1.2rem;
+}
+
+.regenerate-action:hover:not(:disabled) {
+  background: var(--ink);
+  color: #fffefb;
+}
+
+.regenerate-action:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.error-banner {
+  background: #fff0eb;
+  border-left: 3px solid var(--accent);
+  color: #8a392c;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 1rem 0 0;
+  padding: 0.8rem 0.9rem;
+}
+
+@media (max-width: 650px) {
+  .results-hero {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .score-stamp {
+    align-self: stretch;
+  }
+
+  .explanation-grid {
+    grid-template-columns: 1fr;
+  }
+}
